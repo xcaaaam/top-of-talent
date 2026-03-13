@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nosotros — Top of Talent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root { --purple:#c86cff; --blue:#3fa9ff; --black:#000; --white:#fff; --gray:#888; --cream:#f0ede8; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Roboto Mono',monospace;background:var(--cream);color:var(--black);min-height:100vh;cursor:none;overflow-x:hidden}
+.cursor{position:fixed;width:8px;height:8px;background:var(--purple);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s}
+.cursor-ring{position:fixed;width:32px;height:32px;border:1.5px solid rgba(200,108,255,.6);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:all .12s ease}
+.tot-logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+.tot-logo-mark{width:30px;height:30px;flex-shrink:0}
+.tot-logo-text{font-weight:700;font-size:10px;letter-spacing:.2em;text-transform:uppercase;line-height:1.3}
+header{position:fixed;top:0;left:0;right:0;z-index:300;display:flex;align-items:center;justify-content:space-between;padding:20px 40px;background:rgba(240,237,232,.92);backdrop-filter:blur(12px);border-bottom:1px solid rgba(0,0,0,.08)}
+nav.main-nav{display:flex;align-items:center;gap:36px}
+nav.main-nav a{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.25em;color:rgba(0,0,0,.4);text-decoration:none;text-transform:uppercase;cursor:none;transition:color .2s;position:relative}
+nav.main-nav a:hover,nav.main-nav a.active{color:var(--black)}
+nav.main-nav a.active::after{content:'';position:absolute;bottom:-4px;left:0;right:0;height:1px;background:var(--purple)}
+.menu-btn{background:none;border:none;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:10px;letter-spacing:.25em;color:var(--black);cursor:none;text-transform:uppercase;display:flex;align-items:center;gap:10px;padding:0;transition:color .2s}
+.menu-btn:hover{color:var(--purple)}
+.menu-lines{display:flex;flex-direction:column;gap:4px}
+.menu-lines span{display:block;height:1px;background:currentColor;transition:width .3s}
+.menu-lines span:nth-child(1){width:20px}
+.menu-lines span:nth-child(2){width:13px}
+.menu-btn:hover .menu-lines span{width:20px}
+
+.content{padding:140px 40px 80px;max-width:900px}
+.eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.35em;color:var(--purple);text-transform:uppercase;margin-bottom:24px;display:flex;align-items:center;gap:14px}
+.eyebrow::before{content:'';display:block;width:32px;height:1px;background:var(--purple)}
+.big-title{font-family:'Roboto Mono',monospace;font-weight:700;font-size:clamp(48px,8vw,100px);text-transform:uppercase;letter-spacing:-.03em;line-height:.9;margin-bottom:60px}
+.big-title .light{font-weight:300;font-style:italic;color:rgba(0,0,0,.3)}
+.manifesto{display:flex;flex-direction:column;gap:28px;margin-bottom:80px}
+.manifesto p{font-family:'JetBrains Mono',monospace;font-size:15px;line-height:1.9;color:rgba(0,0,0,.65);max-width:660px}
+.manifesto p strong{color:var(--black);font-weight:400;font-style:italic}
+.divider{height:1px;background:rgba(0,0,0,.1);margin:60px 0}
+.contact-area{display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:start}
+.contact-block{display:flex;flex-direction:column;gap:8px}
+.contact-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.3em;color:rgba(0,0,0,.35);text-transform:uppercase}
+.contact-val{font-family:'Roboto Mono',monospace;font-weight:700;font-size:18px;text-decoration:none;color:var(--black);cursor:none;transition:color .2s}
+.contact-val:hover{color:var(--purple)}
+.coming-note{background:var(--black);color:var(--white);padding:40px;margin-top:60px}
+.coming-note p{font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.8;color:rgba(255,255,255,.6)}
+.coming-note strong{color:var(--purple);font-weight:400}
+
+/* NAV OVERLAY */
+.nav-overlay{position:fixed;inset:0;background:var(--black);z-index:400;display:flex;flex-direction:column;padding:28px 40px;transform:translateY(-100%);transition:transform .6s cubic-bezier(.76,0,.24,1)}
+.nav-overlay.open{transform:translateY(0)}
+.nav-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:80px}
+.nav-close{background:none;border:none;font-family:'Roboto Mono',monospace;font-weight:700;font-size:11px;letter-spacing:.25em;color:var(--white);cursor:none;text-transform:uppercase;transition:color .2s}
+.nav-close:hover{color:var(--purple)}
+.nav-links{display:flex;flex-direction:column;gap:8px;flex:1;justify-content:center}
+.nav-link{font-family:'Roboto Mono',monospace;font-weight:700;font-size:clamp(36px,7vw,80px);text-transform:uppercase;letter-spacing:-.02em;color:rgba(255,255,255,.25);text-decoration:none;cursor:none;line-height:1.1;transition:color .2s;display:flex;align-items:center;gap:20px}
+.nav-link:hover,.nav-link.current{color:var(--white)}
+.nav-link.current .nav-lnum{color:var(--purple)}
+.nav-lnum{font-size:11px;letter-spacing:.2em;color:rgba(255,255,255,.2);align-self:flex-end;margin-bottom:10px;transition:color .2s}
+.nav-link:hover .nav-lnum{color:var(--purple)}
+</style>
+</head>
+<body>
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="ring"></div>
+
+<div class="nav-overlay" id="navOverlay">
+  <div class="nav-header">
+    <a href="index.html" class="tot-logo">
+      <svg class="tot-logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" fill="white"/>
+        <polygon points="18,0 38,0 82,100 62,100" fill="black"/>
+        <polygon points="0,42 100,14 100,30 0,58" fill="black"/>
+      </svg>
+      <span class="tot-logo-text" style="color:white">Top of<br>Talent</span>
+    </a>
+    <button class="nav-close" onclick="closeNav()">Cerrar ✕</button>
+  </div>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link"><span class="nav-lnum">01</span>Inicio</a>
+    <a href="talento.html" class="nav-link"><span class="nav-lnum">02</span>Talento</a>
+    <a href="proyectos.html" class="nav-link"><span class="nav-lnum">03</span>Proyectos</a>
+    <a href="nosotros.html" class="nav-link current"><span class="nav-lnum">04</span>Nosotros</a>
+  </div>
+</div>
+
+<header>
+  <a href="index.html" class="tot-logo">
+    <svg class="tot-logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="white"/>
+      <polygon points="18,0 38,0 82,100 62,100" fill="black"/>
+      <polygon points="0,42 100,14 100,30 0,58" fill="black"/>
+    </svg>
+    <span class="tot-logo-text">Top of<br>Talent</span>
+  </a>
+  <nav class="main-nav">
+    <a href="index.html">Inicio</a>
+    <a href="talento.html">Talento</a>
+    <a href="proyectos.html">Proyectos</a>
+    <a href="nosotros.html" class="active">Nosotros</a>
+  </nav>
+  <button class="menu-btn" onclick="openNav()">
+    <div class="menu-lines"><span></span><span></span></div>
+    Menu
+  </button>
+</header>
+
+<div class="content">
+  <p class="eyebrow">Quiénes somos</p>
+  <h1 class="big-title">Nos<span class="light">otros</span></h1>
+
+  <div class="manifesto">
+    <p>
+      <strong>Top of Talent</strong> nació de una pregunta simple: ¿por qué Ecuador tiene tanto talento musical y tan poca visibilidad para él?
+    </p>
+    <p>
+      No somos un sello. No somos una agencia. Somos una publicación editorial independiente, creada por personas que creen que la escena musical ecuatoriana merece el mismo estándar de documentación y crítica que las escenas que admiramos afuera.
+    </p>
+    <p>
+      Nuestro modelo es el del periodismo musical clásico: <strong>curamos, rankeamos, opinamos.</strong> Las fichas de artistas, los tops semanales y las reseñas son la voz de nuestros editores, no la de los artistas mismos. Eso nos da independencia y nos obliga a ser rigurosos.
+    </p>
+    <p>
+      Empezamos con la música. Pero la idea siempre fue más amplia: <strong>talento ecuatoriano</strong> en todas sus formas. Lo musical es el primer capítulo.
+    </p>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="contact-area">
+    <div>
+      <div class="contact-block" style="margin-bottom:32px">
+        <span class="contact-label">Email</span>
+        <a href="mailto:contactoftalent@gmail.com" class="contact-val">contactoftalent@gmail.com</a>
+      </div>
+      <div class="contact-block">
+        <span class="contact-label">Instagram</span>
+        <a href="#" class="contact-val">@topoftalent</a>
+      </div>
+    </div>
+    <div>
+      <div class="contact-block" style="margin-bottom:32px">
+        <span class="contact-label">País</span>
+        <span class="contact-val" style="cursor:default">Ecuador 🇪🇨</span>
+      </div>
+      <div class="contact-block">
+        <span class="contact-label">Fundado</span>
+        <span class="contact-val" style="cursor:default">2025</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="coming-note">
+    <p>
+      Esta sección irá creciendo con el tiempo. Próximamente: el equipo editorial, nuestra metodología de ranking, cómo postularse para ser reseñado, y el manifiesto completo del proyecto.<br><br>
+      <strong>Por ahora, la música habla por nosotros.</strong>
+    </p>
+  </div>
+</div>
+
+<script>
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('ring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e=>{
+  mx=e.clientX;my=e.clientY;
+  cursor.style.left=mx+'px';cursor.style.top=my+'px';
+});
+(function animRing(){
+  rx+=(mx-rx)*.13;ry+=(my-ry)*.13;
+  ring.style.left=rx+'px';ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a,button').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{cursor.style.width='14px';cursor.style.height='14px';ring.style.width='44px';ring.style.height='44px'});
+  el.addEventListener('mouseleave',()=>{cursor.style.width='8px';cursor.style.height='8px';ring.style.width='32px';ring.style.height='32px'});
+});
+function openNav(){document.getElementById('navOverlay').classList.add('open');document.body.style.overflow='hidden'}
+function closeNav(){document.getElementById('navOverlay').classList.remove('open');document.body.style.overflow=''}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeNav()});
+</script>
+</body>
+</html>
