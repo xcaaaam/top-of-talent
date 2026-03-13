@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Nombre Artista — Top of Talent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,500;0,700;1,300;1,400&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --purple: #c86cff;
+  --blue: #3fa9ff;
+  --black: #000000;
+  --white: #ffffff;
+  --gray: #888888;
+  --gray-dim: #2a2a2a;
+  --gray-mid: #555555;
+  --cream: #f2f0ec;
+  --cream-dark: #e8e5e0;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+
+body {
+  font-family: 'Roboto Mono', monospace;
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ─── CUSTOM CURSOR ─── */
+.cursor {
+  position: fixed; width: 8px; height: 8px;
+  background: var(--purple); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width .2s, height .2s;
+  mix-blend-mode: difference;
+}
+.cursor-ring {
+  position: fixed; width: 32px; height: 32px;
+  border: 1px solid rgba(200,108,255,.5); border-radius: 50%;
+  pointer-events: none; z-index: 9998;
+  transform: translate(-50%,-50%);
+}
+
+/* ─── LOGO SVG ─── */
+.logo-svg { width: 32px; height: 32px; flex-shrink: 0; }
+
+/* ─── HEADER ─── */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 40px;
+  mix-blend-mode: difference;
+}
+
+.logo-link {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; color: var(--white);
+}
+.logo-name {
+  font-weight: 700; font-size: 11px; letter-spacing: .2em;
+  text-transform: uppercase; line-height: 1.3;
+}
+
+.back-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .25em; color: var(--white);
+  text-transform: uppercase; text-decoration: none;
+  display: flex; align-items: center; gap: 8px;
+  cursor: none; transition: opacity .2s;
+}
+.back-btn:hover { opacity: .6; }
+
+/* ─── SECTION SNAP ─── */
+.snap-section {
+  scroll-snap-align: start;
+  min-height: 100vh;
+}
+
+/* ══════════════════════════════════════
+   PASO 1 — HERO FOTO COMPLETA
+══════════════════════════════════════ */
+#paso1 {
+  position: relative;
+  height: 100vh;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  overflow: hidden;
+  color: var(--white);
+}
+
+.hero-photo {
+  position: absolute; inset: 0;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+  /* Replace with actual artist photo as background-image */
+}
+
+/* Placeholder photo effect */
+.hero-photo::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 40%, rgba(200,108,255,.15) 0%, transparent 60%),
+              radial-gradient(ellipse at 70% 60%, rgba(63,169,255,.1) 0%, transparent 60%);
+}
+
+.hero-photo::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,.9) 0%, rgba(0,0,0,.4) 40%, transparent 70%);
+}
+
+/* Photo placeholder visual */
+.photo-placeholder {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+}
+.photo-placeholder span {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .25em;
+  color: rgba(255,255,255,.2); text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,.1);
+  padding: 12px 20px;
+}
+
+/* Left side: social stats */
+.hero-left {
+  position: absolute; left: 40px; bottom: 60px;
+  z-index: 10;
+  display: flex; flex-direction: column; gap: 8px;
+}
+.social-stat {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .15em;
+  color: rgba(255,255,255,.5); text-transform: uppercase;
+  cursor: none; transition: color .2s;
+}
+.social-stat:hover { color: var(--white); }
+.social-stat strong { color: var(--white); }
+
+/* Right side: quick bio */
+.hero-right {
+  position: absolute; right: 40px; top: 50%; transform: translateY(-50%);
+  z-index: 10; max-width: 280px;
+}
+.hero-bio-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.8;
+  color: rgba(255,255,255,.6);
+}
+.hero-bio-text strong { color: var(--white); display: block; margin-bottom: 12px; font-size: 10px; letter-spacing: .2em; text-transform: uppercase; }
+
+/* Bottom: artist name huge */
+.hero-bottom-name {
+  position: relative; z-index: 10;
+  padding: 0 40px 40px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+}
+.hero-artist-name {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: clamp(64px, 12vw, 140px);
+  text-transform: uppercase;
+  letter-spacing: -.03em;
+  line-height: .9;
+  color: var(--white);
+}
+.hero-meta-right {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
+  padding-bottom: 8px;
+}
+.hero-ep {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .2em;
+  color: rgba(255,255,255,.4); text-transform: uppercase;
+}
+.hero-rank-badge {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 13px;
+  color: var(--purple); letter-spacing: .1em;
+  border: 1px solid rgba(200,108,255,.4);
+  padding: 6px 12px;
+}
+
+/* Scroll indicator */
+.scroll-indicator {
+  position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+  z-index: 10;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .3em;
+  color: rgba(255,255,255,.3); text-transform: uppercase;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  animation: bounce 2s ease-in-out infinite;
+}
+@keyframes bounce {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(6px); }
+}
+
+/* ══════════════════════════════════════
+   PASO 2 — FICHA / SPECS TABLE
+══════════════════════════════════════ */
+#paso2 {
+  background: var(--cream);
+  color: var(--black);
+  padding: 120px 40px 80px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+
+.paso-header {
+  display: flex; align-items: baseline; gap: 24px;
+  margin-bottom: 60px;
+}
+.paso-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .3em;
+  color: var(--purple); text-transform: uppercase;
+}
+.paso-title {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: clamp(24px, 4vw, 40px);
+  text-transform: uppercase; letter-spacing: -.01em;
+}
+
+.specs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.specs-table tr {
+  border-top: 1px solid rgba(0,0,0,.12);
+  transition: background .2s;
+  cursor: none;
+}
+.specs-table tr:last-child { border-bottom: 1px solid rgba(0,0,0,.12); }
+.specs-table tr:hover { background: rgba(0,0,0,.03); }
+
+.specs-table td {
+  padding: 20px 0;
+  font-family: 'JetBrains Mono', monospace;
+  vertical-align: top;
+}
+.specs-table td:first-child {
+  font-size: 11px; letter-spacing: .2em;
+  color: var(--gray-mid); text-transform: uppercase;
+  font-weight: 400; width: 35%;
+}
+.specs-table td:last-child {
+  font-size: 14px; letter-spacing: .02em;
+  color: var(--black); font-weight: 400;
+}
+.spec-highlight { color: var(--purple); }
+
+/* ══════════════════════════════════════
+   PASO 3 — GALERÍA DE FOTOS
+══════════════════════════════════════ */
+#paso3 {
+  background: var(--black);
+  color: var(--white);
+  padding: 0;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+.gallery-header {
+  padding: 120px 40px 60px;
+  display: flex; align-items: flex-end; justify-content: space-between;
+}
+.gallery-title {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: clamp(48px, 10vw, 120px);
+  text-transform: uppercase;
+  letter-spacing: -.03em;
+  line-height: .85;
+}
+.gallery-title .slash { color: var(--purple); }
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 2px;
+  flex: 1;
+}
+
+.gallery-photo {
+  background: var(--gray-dim);
+  aspect-ratio: 3/4;
+  position: relative;
+  overflow: hidden;
+  cursor: none;
+}
+
+.gallery-photo:first-child {
+  grid-row: 1 / 3;
+  aspect-ratio: auto;
+}
+
+.photo-bg {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform .5s ease;
+}
+.gallery-photo:hover .photo-bg { transform: scale(1.04); }
+
+/* Photo placeholder gradients */
+.p1 { background: linear-gradient(160deg, #1a1a1a 0%, #2d2d2d 100%); }
+.p2 { background: linear-gradient(160deg, #111 0%, #222 100%); }
+.p3 { background: linear-gradient(160deg, #1c1c1c 0%, #333 100%); }
+.p4 { background: linear-gradient(160deg, #0f0f0f 0%, #2a2a2a 100%); }
+
+.photo-label {
+  position: absolute; bottom: 16px; left: 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .2em;
+  color: rgba(255,255,255,.3); text-transform: uppercase;
+}
+
+.photo-placeholder-icon {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .2em;
+  color: rgba(255,255,255,.1); text-transform: uppercase;
+  border: 1px solid rgba(255,255,255,.06);
+  padding: 10px 14px;
+}
+
+/* ══════════════════════════════════════
+   PASO 4 — BIOGRAFÍA
+══════════════════════════════════════ */
+#paso4 {
+  background: var(--white);
+  color: var(--black);
+  padding: 120px 40px 80px;
+}
+
+.bio-layout {
+  display: grid;
+  grid-template-columns: 1fr 2fr 1fr;
+  gap: 60px;
+  align-items: start;
+}
+
+.bio-left {
+  display: flex; flex-direction: column; gap: 40px;
+  padding-top: 8px;
+}
+.bio-meta-block { display: flex; flex-direction: column; gap: 6px; }
+.bio-meta-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .3em;
+  color: var(--gray-mid); text-transform: uppercase;
+}
+.bio-meta-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; color: var(--black); line-height: 1.5;
+}
+.bio-meta-value.purple { color: var(--purple); }
+
+.bio-main {
+  padding-top: 8px;
+}
+.bio-headline {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: clamp(14px, 2vw, 20px);
+  line-height: 1.5;
+  margin-bottom: 40px;
+  letter-spacing: -.01em;
+}
+.bio-body {
+  display: flex; flex-direction: column; gap: 20px;
+}
+.bio-body p {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; line-height: 1.9;
+  color: #333;
+}
+.bio-body p strong { color: var(--black); font-weight: 400; font-style: italic; }
+
+.bio-right {
+  display: flex; flex-direction: column; gap: 24px;
+  padding-top: 8px;
+}
+.credit-block { display: flex; flex-direction: column; gap: 8px; }
+.credit-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .25em;
+  color: var(--gray-mid); text-transform: uppercase;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(0,0,0,.1);
+}
+.credit-item {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; color: var(--black); line-height: 1.6;
+}
+
+/* ══════════════════════════════════════
+   PASO 5 — FRASE RESUMEN + METADATA
+══════════════════════════════════════ */
+#paso5 {
+  background: var(--cream);
+  color: var(--black);
+  padding: 120px 40px 60px;
+  display: flex; flex-direction: column; justify-content: space-between;
+  min-height: 100vh;
+}
+
+.quote-section {
+  flex: 1; display: flex; flex-direction: column; justify-content: center;
+  max-width: 800px;
+}
+.quote-eyebrow {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .3em;
+  color: var(--gray-mid); text-transform: uppercase;
+  margin-bottom: 32px;
+  display: flex; align-items: center; gap: 16px;
+}
+.quote-eyebrow::before {
+  content: ''; display: block;
+  width: 32px; height: 1px; background: var(--purple);
+}
+.quote-text {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: clamp(32px, 5.5vw, 64px);
+  letter-spacing: -.02em;
+  line-height: 1.15;
+  margin-bottom: 40px;
+}
+.quote-text .italic-word {
+  font-weight: 300; font-style: italic;
+  color: var(--gray-mid);
+}
+
+.quote-attr {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .15em;
+  color: var(--gray-mid); text-transform: uppercase;
+}
+
+/* Metadata bar at bottom */
+.metadata-bar {
+  border-top: 1px solid rgba(0,0,0,.12);
+  padding-top: 32px;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  gap: 32px;
+}
+.meta-col { display: flex; flex-direction: column; gap: 6px; }
+.meta-col-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .3em;
+  color: var(--gray-mid); text-transform: uppercase;
+}
+.meta-col-value {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 13px;
+  color: var(--black); letter-spacing: .02em;
+}
+
+/* CTA row */
+.profile-cta {
+  display: flex; gap: 16px; align-items: center;
+  margin-top: 48px; flex-wrap: wrap;
+}
+.btn-dark {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--black); color: var(--white);
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 11px; letter-spacing: .2em;
+  text-transform: uppercase; text-decoration: none;
+  padding: 14px 24px; cursor: none; transition: background .2s;
+}
+.btn-dark:hover { background: var(--purple); }
+
+.btn-outline {
+  display: inline-flex; align-items: center; gap: 10px;
+  border: 1px solid rgba(0,0,0,.3); color: var(--black);
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 11px; letter-spacing: .2em;
+  text-transform: uppercase; text-decoration: none;
+  padding: 14px 24px; cursor: none; transition: all .2s;
+}
+.btn-outline:hover { border-color: var(--purple); color: var(--purple); }
+
+/* ─── NEXT ARTIST ─── */
+.next-artist {
+  background: var(--black);
+  border-top: 1px solid var(--gray-dim);
+  padding: 60px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  cursor: none;
+  transition: padding-left .3s;
+  text-decoration: none;
+}
+.next-artist:hover { padding-left: 56px; }
+.next-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .25em;
+  color: var(--gray); text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.next-name {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: clamp(28px, 5vw, 56px);
+  text-transform: uppercase;
+  letter-spacing: -.02em;
+  color: var(--white);
+}
+.next-arrow {
+  font-size: 32px; color: var(--purple);
+  transition: transform .3s;
+}
+.next-artist:hover .next-arrow { transform: translateX(8px); }
+
+/* ─── MOBILE ─── */
+@media (max-width: 768px) {
+  header { padding: 16px 20px; }
+  .hero-left { left: 20px; bottom: 80px; }
+  .hero-right { display: none; }
+  .hero-bottom-name { padding: 0 20px 20px; }
+  #paso2, #paso4, #paso5 { padding: 100px 20px 60px; }
+  .gallery-header { padding: 100px 20px 40px; }
+  .gallery-grid { grid-template-columns: 1fr 1fr; }
+  .gallery-photo:first-child { grid-row: auto; }
+  .bio-layout { grid-template-columns: 1fr; gap: 32px; }
+  .bio-right { display: none; }
+  .metadata-bar { grid-template-columns: 1fr 1fr; gap: 20px; }
+  .next-artist { padding: 40px 20px; }
+  .next-artist:hover { padding-left: 28px; }
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.fade-up {
+  opacity: 0; transform: translateY(20px);
+  transition: opacity .7s ease, transform .7s ease;
+}
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- ─── HEADER ─── -->
+<header>
+  <a href="index.html" class="logo-link">
+    <svg class="logo-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+      <!-- Top of Talent logo recreation -->
+      <rect width="40" height="40" fill="white"/>
+      <!-- Diagonal bar 1: top-left to bottom-right -->
+      <polygon points="5,0 15,0 35,40 25,40" fill="black"/>
+      <!-- Diagonal bar 2: perpendicular -->
+      <polygon points="15,0 25,0 40,22 40,32" fill="black"/>
+      <!-- Small center fill -->
+      <polygon points="0,10 10,10 0,28" fill="black"/>
+    </svg>
+    <span class="logo-name" style="color:white">Top of<br>Talent</span>
+  </a>
+  <a href="index.html" class="back-btn">← Todos los Artistas</a>
+</header>
+
+<!-- ══════════════════════
+     PASO 1 — HERO
+══════════════════════ -->
+<section id="paso1" class="snap-section">
+  <div class="hero-photo">
+    <div class="photo-placeholder">
+      <span>Foto Principal del Artista</span>
+    </div>
+  </div>
+
+  <!-- Social stats left -->
+  <div class="hero-left">
+    <div class="social-stat">INSTAGRAM <strong>67K</strong></div>
+    <div class="social-stat">SPOTIFY <strong>12K</strong> oyentes/mes</div>
+    <div class="social-stat">YOUTUBE <strong>8K</strong> suscriptores</div>
+    <div class="social-stat">TIKTOK <strong>45K</strong></div>
+  </div>
+
+  <!-- Quick bio right -->
+  <div class="hero-right">
+    <div class="hero-bio-text">
+      <strong>Top of Talent · Ecuador</strong>
+      Artista independiente de Quito con una propuesta que redefine el indie ecuatoriano. Con más de 6 años en la escena, su música atraviesa géneros sin perder identidad.
+    </div>
+  </div>
+
+  <!-- Name bottom -->
+  <div class="hero-bottom-name">
+    <h1 class="hero-artist-name">Nombre<br>Artista</h1>
+    <div class="hero-meta-right">
+      <span class="hero-ep">EP.01 · 2025</span>
+      <span class="hero-rank-badge"># 01 TOP OF TALENT</span>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    Scroll
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6l5 5 5-5" stroke="currentColor" stroke-width="1.2"/></svg>
+  </div>
+</section>
+
+<!-- ══════════════════════
+     PASO 2 — FICHA
+══════════════════════ -->
+<section id="paso2" class="snap-section">
+  <div class="paso-header fade-up">
+    <span class="paso-num">02 —</span>
+    <h2 class="paso-title">Perfil del Artista</h2>
+  </div>
+
+  <table class="specs-table">
+    <tr class="fade-up">
+      <td>Nombre artístico</td>
+      <td>Nombre Artista</td>
+    </tr>
+    <tr class="fade-up">
+      <td>Nombre real</td>
+      <td>Nombre Apellido</td>
+    </tr>
+    <tr class="fade-up">
+      <td>Ciudad de origen</td>
+      <td>Quito, Ecuador</td>
+    </tr>
+    <tr class="fade-up">
+      <td>Género musical</td>
+      <td><span class="spec-highlight">Indie · Alternativo · Dream Pop</span></td>
+    </tr>
+    <tr class="fade-up">
+      <td>Activo desde</td>
+      <td>2018</td>
+    </tr>
+    <tr class="fade-up">
+      <td>Tipo</td>
+      <td>Solista</td>
+    </tr>
+    <tr class="fade-up">
+      <td>Discografía</td>
+      <td>2 álbumes · 3 EPs · 12 sencillos</td>
+    </tr>
+    <tr class="fade-up">
+      <td>Plataformas</td>
+      <td>Spotify · Apple Music · YouTube · SoundCloud</td>
+    </tr>
+    <tr class="fade-up">
+      <td>Colaboraciones</td>
+      <td>Artista B · Artista C · Banda X</td>
+    </tr>
+    <tr class="fade-up">
+      <td>Score Top of Talent</td>
+      <td><span class="spec-highlight" style="font-size:20px;font-weight:700">97 / 100</span></td>
+    </tr>
+  </table>
+</section>
+
+<!-- ══════════════════════
+     PASO 3 — GALERÍA
+══════════════════════ -->
+<section id="paso3" class="snap-section">
+  <div class="gallery-header">
+    <h2 class="gallery-title fade-up">
+      Gale<span class="slash">/</span><br>ría
+    </h2>
+    <div style="text-align:right">
+      <p class="paso-num" style="color:var(--gray);margin-bottom:8px">03 — Fotos</p>
+      <p style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--gray);letter-spacing:.15em">Fotografía editorial<br>Top of Talent © 2025</p>
+    </div>
+  </div>
+
+  <div class="gallery-grid">
+    <div class="gallery-photo">
+      <div class="photo-bg p1">
+        <span class="photo-placeholder-icon">Foto Principal</span>
+      </div>
+      <span class="photo-label">Foto 01 · Press</span>
+    </div>
+    <div class="gallery-photo">
+      <div class="photo-bg p2">
+        <span class="photo-placeholder-icon">Foto 02</span>
+      </div>
+      <span class="photo-label">Foto 02 · Live</span>
+    </div>
+    <div class="gallery-photo">
+      <div class="photo-bg p3">
+        <span class="photo-placeholder-icon">Foto 03</span>
+      </div>
+      <span class="photo-label">Foto 03 · Studio</span>
+    </div>
+    <div class="gallery-photo">
+      <div class="photo-bg p4">
+        <span class="photo-placeholder-icon">Foto 04</span>
+      </div>
+      <span class="photo-label">Foto 04 · Event</span>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════
+     PASO 4 — BIOGRAFÍA
+══════════════════════ -->
+<section id="paso4" class="snap-section">
+  <div class="paso-header fade-up" style="border-bottom:1px solid rgba(0,0,0,.1);padding-bottom:40px;margin-bottom:60px">
+    <span class="paso-num" style="color:var(--purple)">04 —</span>
+    <h2 class="paso-title" style="color:var(--black)">Biografía</h2>
+  </div>
+
+  <div class="bio-layout">
+    <!-- Left: metadata -->
+    <div class="bio-left fade-up">
+      <div class="bio-meta-block">
+        <span class="bio-meta-label">Ciudad</span>
+        <span class="bio-meta-value">Quito, Ecuador</span>
+      </div>
+      <div class="bio-meta-block">
+        <span class="bio-meta-label">Año de inicio</span>
+        <span class="bio-meta-value">2018</span>
+      </div>
+      <div class="bio-meta-block">
+        <span class="bio-meta-label">Género</span>
+        <span class="bio-meta-value purple">Indie · Alternativo</span>
+      </div>
+      <div class="bio-meta-block">
+        <span class="bio-meta-label">Sello</span>
+        <span class="bio-meta-value">Independiente</span>
+      </div>
+      <div class="bio-meta-block">
+        <span class="bio-meta-label">Dirección editorial</span>
+        <span class="bio-meta-value">Top of Talent</span>
+      </div>
+      <div class="bio-meta-block">
+        <span class="bio-meta-label">Fotografía</span>
+        <span class="bio-meta-value">Por confirmar</span>
+      </div>
+    </div>
+
+    <!-- Center: biography text -->
+    <div class="bio-main fade-up">
+      <p class="bio-headline">
+        Una voz que nació en las calles de Quito y encontró su lugar entre los grandes de la escena indie latinoamericana.
+      </p>
+      <div class="bio-body">
+        <p>
+          Nombre Artista comenzó su carrera musical en 2018, tocando en bares pequeños del centro histórico de Quito. Desde sus primeras actuaciones, quedó claro que su propuesta era diferente: <strong>letras cargadas de imágenes urbanas</strong> combinadas con una producción que mezclaba lo orgánico con lo electrónico.
+        </p>
+        <p>
+          Su primer EP, lanzado en 2020, circuló por redes sociales y llegó a playlists curadas en Spotify sin ningún respaldo de sello discográfico. Ese logro independiente marcó el inicio de una trayectoria construida desde abajo, <strong>con honestidad y trabajo constante.</strong>
+        </p>
+        <p>
+          En 2022 lanzó su álbum debut, recibido con críticas positivas por medios especializados de Ecuador y Colombia. La gira que siguió agotó entradas en cuatro ciudades. Hoy, con más de 12.000 oyentes mensuales en Spotify, sigue siendo uno de los nombres más relevantes del indie ecuatoriano contemporáneo.
+        </p>
+        <p>
+          Su música habla de la ciudad, de las contradicciones de crecer en un país con industria cultural limitada, y de encontrar belleza exactamente ahí. Eso es lo que lo hace <strong>irreemplazable.</strong>
+        </p>
+      </div>
+    </div>
+
+    <!-- Right: credits -->
+    <div class="bio-right fade-up">
+      <div class="credit-block">
+        <span class="credit-label">Discografía destacada</span>
+        <span class="credit-item">Álbum Debut (2022)</span>
+        <span class="credit-item">EP Vol. 1 (2020)</span>
+        <span class="credit-item">Sencillo X (2024)</span>
+      </div>
+      <div class="credit-block">
+        <span class="credit-label">Premios y reconocimientos</span>
+        <span class="credit-item">Premio X · Ecuador 2023</span>
+        <span class="credit-item">Nominación Y · 2022</span>
+      </div>
+      <div class="credit-block">
+        <span class="credit-label">Prensa</span>
+        <span class="credit-item">El Comercio · 2023</span>
+        <span class="credit-item">Revista Z · 2022</span>
+        <span class="credit-item">Blog Musical X</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════
+     PASO 5 — FRASE + METADATA
+══════════════════════ -->
+<section id="paso5" class="snap-section">
+  <div class="quote-section">
+    <p class="quote-eyebrow">Resumen de carrera</p>
+    <blockquote class="quote-text fade-up">
+      Música que nació <span class="italic-word">independiente</span><br>
+      y llegó más lejos que cualquier<br>
+      sello hubiera imaginado.
+    </blockquote>
+    <p class="quote-attr fade-up">— Top of Talent Editorial, 2025</p>
+
+    <div class="profile-cta fade-up">
+      <a href="#" class="btn-dark">Escuchar en Spotify →</a>
+      <a href="#" class="btn-outline">Ver en Instagram</a>
+    </div>
+  </div>
+
+  <div class="metadata-bar fade-up">
+    <div class="meta-col">
+      <span class="meta-col-label">Artista</span>
+      <span class="meta-col-value">Nombre Artista</span>
+    </div>
+    <div class="meta-col">
+      <span class="meta-col-label">Año de reseña</span>
+      <span class="meta-col-value">2025</span>
+    </div>
+    <div class="meta-col">
+      <span class="meta-col-label">Categoría</span>
+      <span class="meta-col-value">Indie · Alternativo<br>Dirección editorial<br>Top of Talent</span>
+    </div>
+    <div class="meta-col">
+      <span class="meta-col-label">Score</span>
+      <span class="meta-col-value" style="color:var(--purple);font-size:28px">97</span>
+    </div>
+  </div>
+</section>
+
+<!-- ─── NEXT ARTIST ─── -->
+<a href="#" class="next-artist">
+  <div>
+    <p class="next-label">Siguiente artista</p>
+    <p class="next-name">Artista Dos</p>
+  </div>
+  <span class="next-arrow">→</span>
+</a>
+
+<script>
+// Cursor
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  cursor.style.left=mx+'px'; cursor.style.top=my+'px';
+});
+(function animRing(){
+  rx+=(mx-rx)*.13; ry+=(my-ry)*.13;
+  ring.style.left=rx+'px'; ring.style.top=ry+'px';
+  requestAnimationFrame(animRing);
+})();
+
+document.querySelectorAll('a,button,.gallery-photo,.specs-table tr,.next-artist').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    cursor.style.width='16px'; cursor.style.height='16px';
+    ring.style.width='48px'; ring.style.height='48px';
+  });
+  el.addEventListener('mouseleave',()=>{
+    cursor.style.width='8px'; cursor.style.height='8px';
+    ring.style.width='32px'; ring.style.height='32px';
+  });
+});
+
+// Scroll-triggered fade-up
+const obs = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('visible'); });
+},{threshold:.15});
+document.querySelectorAll('.fade-up').forEach(el=>obs.observe(el));
+</script>
+</body>
+</html>
