@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Top of Talent</title>
+<style>
+/* ── Todo Helvetica ── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+
+body {
+  font-family: Helvetica, 'Helvetica Neue', Arial, sans-serif;
+  background: #000;
+  color: #fff;
+  cursor: none;
+  overflow: hidden; /* una sola pantalla, sin scroll */
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── CURSOR ── */
+.cursor {
+  position: fixed; width: 8px; height: 8px;
+  background: #c86cff; border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width .18s, height .18s;
+}
+.cursor-ring {
+  position: fixed; width: 30px; height: 30px;
+  border: 1px solid rgba(200,108,255,.5); border-radius: 50%;
+  pointer-events: none; z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: all .1s ease;
+}
+
+/* ── NOISE ── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .35;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+}
+
+/* ── HEADER ── */
+header {
+  position: relative; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 24px 40px;
+  flex-shrink: 0;
+}
+
+.logo {
+  display: flex; align-items: center; gap: 11px; text-decoration: none;
+}
+.logo-icon { width: 32px; height: 32px; flex-shrink: 0; }
+.logo-text {
+  font-weight: 700; font-size: 10px; letter-spacing: .2em;
+  color: #fff; text-transform: uppercase; line-height: 1.35;
+}
+
+/* HORIZONTAL NAV — centered */
+nav.h-nav {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center;
+}
+nav.h-nav a {
+  font-size: 11px; font-weight: 400; letter-spacing: .22em;
+  color: rgba(255,255,255,.38); text-decoration: none;
+  text-transform: uppercase; cursor: none;
+  padding: 6px 22px; transition: color .2s; position: relative;
+}
+nav.h-nav a:not(:last-child)::after {
+  content: '|'; position: absolute; right: 0; top: 50%;
+  transform: translateY(-50%); color: rgba(255,255,255,.12); pointer-events: none;
+}
+nav.h-nav a:hover { color: #fff; }
+nav.h-nav a.active {
+  color: #fff;
+}
+nav.h-nav a.active::before {
+  content: ''; position: absolute; bottom: -2px; left: 22px; right: 22px;
+  height: 1px; background: #c86cff;
+}
+
+/* Mobile menu btn */
+.mob-btn {
+  display: none; background: none; border: none;
+  font-family: Helvetica, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700; font-size: 10px; letter-spacing: .25em;
+  color: #fff; cursor: none; text-transform: uppercase;
+  align-items: center; gap: 8px; padding: 0; transition: color .2s;
+}
+.mob-btn:hover { color: #c86cff; }
+.mlines { display: flex; flex-direction: column; gap: 4px; }
+.mlines span { display: block; height: 1px; background: currentColor; transition: width .3s; }
+.mlines span:nth-child(1) { width: 20px; }
+.mlines span:nth-child(2) { width: 13px; }
+.mob-btn:hover .mlines span { width: 20px; }
+
+/* ── HERO — fills remaining space ── */
+.hero {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0 40px 48px;
+  overflow: hidden;
+}
+
+/* Blobs */
+.blob {
+  position: absolute; border-radius: 50%;
+  filter: blur(130px); opacity: .12;
+  animation: drift 14s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+.blob-1 { width: 55vw; height: 55vw; background: #c86cff; top: -10%; right: -5%; }
+.blob-2 { width: 45vw; height: 45vw; background: #3fa9ff; bottom: -5%; left: -5%; animation-delay: -5s; }
+.blob-3 { width: 25vw; height: 25vw; background: #c86cff; bottom: 15%; right: 20%; opacity: .06; animation-delay: -9s; }
+
+@keyframes drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(24px, 16px) scale(1.05); }
+}
+
+/* Scanlines */
+.hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.02) 2px, rgba(0,0,0,.02) 4px);
+}
+
+/* BIG TITLE — pure Helvetica, no color tricks */
+.hero-title {
+  font-weight: 700;
+  font-size: clamp(88px, 14vw, 180px);
+  line-height: .87;
+  text-transform: uppercase;
+  letter-spacing: -.03em;
+  position: relative; z-index: 2;
+  animation: fadeUp 1s .3s both;
+}
+.hero-title .of-line {
+  display: block;
+  font-weight: 300;
+  font-style: italic;
+  color: rgba(255,255,255,.5);
+  font-size: .52em;
+  letter-spacing: .02em;
+  margin-bottom: .06em;
+}
+.hero-title .talent-line { display: block; }
+
+/* Bottom row: scroll left, tagline+cta right */
+.hero-bottom {
+  position: relative; z-index: 2;
+  display: flex; align-items: flex-end; justify-content: space-between;
+  margin-top: 44px;
+  animation: fadeUp 1s .55s both;
+}
+
+.scroll-hint {
+  font-size: 9px; letter-spacing: .3em; color: rgba(255,255,255,.2);
+  text-transform: uppercase; display: flex; align-items: center; gap: 10px;
+  align-self: flex-end;
+}
+.scroll-hint::after {
+  content: ''; display: block; width: 1px; height: 44px;
+  background: linear-gradient(to bottom, rgba(255,255,255,.22), transparent);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100%{opacity:.25} 50%{opacity:.85} }
+
+.hero-right {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 20px;
+}
+.hero-tagline {
+  font-size: 12px; color: rgba(255,255,255,.5);
+  line-height: 1.75; text-align: right; max-width: 320px;
+  font-weight: 400; letter-spacing: .01em;
+}
+.hero-tagline strong { color: #fff; font-weight: 700; }
+
+.btn-sub {
+  display: inline-flex; align-items: center; gap: 12px;
+  background: #c86cff; color: #000;
+  font-weight: 700; font-size: 11px; letter-spacing: .22em;
+  text-transform: uppercase; text-decoration: none;
+  padding: 16px 28px; cursor: none;
+  position: relative; overflow: hidden; transition: background .25s;
+}
+.btn-sub::before {
+  content: ''; position: absolute; inset: 0;
+  background: #3fa9ff; transform: translateX(-100%); transition: transform .3s ease;
+}
+.btn-sub:hover::before { transform: translateX(0); }
+.btn-sub span, .btn-arr { position: relative; z-index: 1; }
+.btn-arr { display: inline-block; transition: transform .25s; }
+.btn-sub:hover .btn-arr { transform: translateX(4px); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── TICKER FOOTER ── */
+.ticker-footer {
+  flex-shrink: 0;
+  border-top: 1px solid #2a2a2a;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: 12px 0;
+  background: #000;
+  position: relative; z-index: 10;
+}
+.ticker-track {
+  display: inline-flex;
+  animation: tickerMove 28s linear infinite;
+}
+.ticker-item {
+  display: inline-flex; align-items: center; gap: 14px;
+  padding: 0 28px;
+  font-size: 10px; letter-spacing: .18em;
+  color: #666; text-transform: uppercase; font-weight: 400;
+}
+.tdot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: #c86cff; flex-shrink: 0;
+}
+@keyframes tickerMove {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* ── FULLSCREEN NAV (mobile) ── */
+.nav-overlay {
+  position: fixed; inset: 0; background: #000; z-index: 400;
+  display: flex; flex-direction: column; padding: 28px 40px;
+  transform: translateY(-100%);
+  transition: transform .55s cubic-bezier(.76,0,.24,1);
+}
+.nav-overlay.open { transform: translateY(0); }
+.nav-ol-hdr {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 80px;
+}
+.nav-close {
+  background: none; border: none; font-family: Helvetica, 'Helvetica Neue', Arial, sans-serif;
+  font-weight: 700; font-size: 11px; letter-spacing: .25em; color: #fff;
+  cursor: none; text-transform: uppercase; transition: color .2s; padding: 0;
+}
+.nav-close:hover { color: #c86cff; }
+.nav-links { display: flex; flex-direction: column; gap: 8px; flex: 1; justify-content: center; }
+.nav-link {
+  font-weight: 700; font-size: clamp(40px, 8vw, 88px);
+  text-transform: uppercase; letter-spacing: -.02em;
+  color: rgba(255,255,255,.2); text-decoration: none;
+  cursor: none; line-height: 1.05; transition: color .2s;
+  display: flex; align-items: center; gap: 18px;
+}
+.nav-link:hover { color: #fff; }
+.nav-link:hover .nl-n { color: #c86cff; }
+.nl-n {
+  font-size: 11px; letter-spacing: .2em; color: rgba(255,255,255,.18);
+  align-self: flex-end; margin-bottom: 8px; transition: color .2s; font-weight: 400;
+}
+
+/* ── RESPONSIVE ── */
+@media (max-width: 900px) {
+  nav.h-nav { display: none; }
+  .mob-btn { display: flex; }
+  header { padding: 18px 24px; }
+  .hero { padding: 0 24px 40px; }
+}
+@media (max-width: 600px) {
+  .hero-bottom { flex-direction: column; gap: 28px; align-items: flex-start; }
+  .hero-right { align-items: flex-start; }
+  .hero-tagline { text-align: left; }
+  body { overflow: auto; } /* allow scroll on very small screens */
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cring"></div>
+
+<!-- FULLSCREEN NAV (mobile) -->
+<div class="nav-overlay" id="navOL">
+  <div class="nav-ol-hdr">
+    <a href="index.html" class="logo">
+      <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" fill="white"/>
+        <polygon points="18,0 38,0 82,100 62,100" fill="black"/>
+        <polygon points="0,42 100,14 100,30 0,58" fill="black"/>
+      </svg>
+      <span class="logo-text">Top of<br>Talent</span>
+    </a>
+    <button class="nav-close" onclick="closeNav()">Cerrar ✕</button>
+  </div>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link"><span class="nl-n">01</span>Inicio</a>
+    <a href="talento.html" class="nav-link"><span class="nl-n">02</span>Talento</a>
+    <a href="proyectos.html" class="nav-link"><span class="nl-n">03</span>Proyectos</a>
+    <a href="nosotros.html" class="nav-link"><span class="nl-n">04</span>Nosotros</a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <a href="index.html" class="logo">
+    <svg class="logo-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="white"/>
+      <polygon points="18,0 38,0 82,100 62,100" fill="black"/>
+      <polygon points="0,42 100,14 100,30 0,58" fill="black"/>
+    </svg>
+    <span class="logo-text">Top of<br>Talent</span>
+  </a>
+
+  <nav class="h-nav">
+    <a href="index.html" class="active">Inicio</a>
+    <a href="talento.html">Talento</a>
+    <a href="proyectos.html">Proyectos</a>
+    <a href="nosotros.html">Nosotros</a>
+  </nav>
+
+  <button class="mob-btn" onclick="openNav()">
+    <div class="mlines"><span></span><span></span></div>
+    Menu
+  </button>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  <div class="blob blob-3"></div>
+
+  <h1 class="hero-title">
+    <span class="of-line">of</span>
+    <span class="talent-line">Top of<br>Talent</span>
+  </h1>
+
+  <div class="hero-bottom">
+    <div class="scroll-hint">Explorar</div>
+    <div class="hero-right">
+      <p class="hero-tagline">
+        La plataforma editorial de la <strong>música ecuatoriana.</strong><br>
+        Descubrimos, rankeamos y celebramos<br>
+        a los artistas que definen una generación.
+      </p>
+      <a href="talento.html" class="btn-sub">
+        <span>Suscribirse</span><span class="btn-arr">→</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER FOOTER -->
+<div class="ticker-footer">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="tdot"></span>Rankings Semanales</span>
+    <span class="ticker-item"><span class="tdot"></span>Reseñas Editoriales</span>
+    <span class="ticker-item"><span class="tdot"></span>Eventos en Vivo</span>
+    <span class="ticker-item"><span class="tdot"></span>Nuevos Lanzamientos</span>
+    <span class="ticker-item"><span class="tdot"></span>Talento Nacional</span>
+    <span class="ticker-item"><span class="tdot"></span>Top of Talent 2025</span>
+    <span class="ticker-item"><span class="tdot"></span>Artistas Ecuatorianos</span>
+    <span class="ticker-item"><span class="tdot"></span>Rankings Semanales</span>
+    <span class="ticker-item"><span class="tdot"></span>Reseñas Editoriales</span>
+    <span class="ticker-item"><span class="tdot"></span>Eventos en Vivo</span>
+    <span class="ticker-item"><span class="tdot"></span>Nuevos Lanzamientos</span>
+    <span class="ticker-item"><span class="tdot"></span>Talento Nacional</span>
+    <span class="ticker-item"><span class="tdot"></span>Top of Talent 2025</span>
+    <span class="ticker-item"><span class="tdot"></span>Artistas Ecuatorianos</span>
+  </div>
+</div>
+
+<script>
+// Cursor
+const c = document.getElementById('cursor');
+const r = document.getElementById('cring');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove', e => {
+  mx=e.clientX; my=e.clientY;
+  c.style.left=mx+'px'; c.style.top=my+'px';
+});
+(function loop(){ rx+=(mx-rx)*.14; ry+=(my-ry)*.14; r.style.left=rx+'px'; r.style.top=ry+'px'; requestAnimationFrame(loop); })();
+document.querySelectorAll('a, button').forEach(el => {
+  el.addEventListener('mouseenter', () => { c.style.width='14px'; c.style.height='14px'; r.style.width='44px'; r.style.height='44px'; r.style.borderColor='rgba(200,108,255,.8)'; });
+  el.addEventListener('mouseleave', () => { c.style.width='8px'; c.style.height='8px'; r.style.width='30px'; r.style.height='30px'; r.style.borderColor='rgba(200,108,255,.5)'; });
+});
+
+// Nav
+function openNav()  { document.getElementById('navOL').classList.add('open');  document.body.style.overflow='hidden'; }
+function closeNav() { document.getElementById('navOL').classList.remove('open'); document.body.style.overflow=''; }
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeNav(); });
+</script>
+</body>
+</html>
