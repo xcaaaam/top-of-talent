@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Talento — Top of Talent</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --purple: #c86cff;
+  --blue: #3fa9ff;
+  --black: #000;
+  --white: #fff;
+  --cream: #f0ede8;
+  --cream-dark: #e2ddd8;
+  --gray: #888;
+  --gray-dim: #2a2a2a;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Roboto Mono', monospace;
+  background: var(--cream);
+  color: var(--black);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* ── CURSOR (no mix-blend-mode) ── */
+.cursor {
+  position: fixed; width: 8px; height: 8px;
+  background: var(--purple); border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: width .2s, height .2s;
+}
+.cursor-ring {
+  position: fixed; width: 32px; height: 32px;
+  border: 1.5px solid rgba(200,108,255,.6); border-radius: 50%;
+  pointer-events: none; z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: all .12s ease;
+}
+
+/* ── LOGO SVG ── */
+.tot-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; color: inherit;
+}
+.tot-logo-mark { width: 30px; height: 30px; flex-shrink: 0; }
+.tot-logo-text {
+  font-weight: 700; font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase; line-height: 1.3;
+}
+
+/* ── HEADER ── */
+header {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 40px;
+  background: rgba(240,237,232,.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+
+nav.main-nav {
+  display: flex; align-items: center; gap: 36px;
+}
+nav.main-nav a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .25em;
+  color: rgba(0,0,0,.4); text-decoration: none;
+  text-transform: uppercase; cursor: none;
+  transition: color .2s;
+  position: relative;
+}
+nav.main-nav a:hover, nav.main-nav a.active { color: var(--black); }
+nav.main-nav a.active::after {
+  content: ''; position: absolute; bottom: -4px; left: 0; right: 0;
+  height: 1px; background: var(--purple);
+}
+
+.header-time {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .15em;
+  color: rgba(0,0,0,.35); text-transform: uppercase;
+}
+
+/* ── PAGE LAYOUT ── */
+.page-wrapper {
+  padding-top: 80px;
+  min-height: 100vh;
+  display: flex; flex-direction: column;
+}
+
+/* ── TOP TOGGLE ── */
+.view-toggle {
+  display: flex; align-items: center; gap: 0;
+  padding: 40px 40px 0;
+}
+.toggle-btn {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .25em;
+  text-transform: uppercase; cursor: none;
+  padding: 10px 24px;
+  border: 1px solid rgba(0,0,0,.15);
+  background: transparent; color: rgba(0,0,0,.4);
+  transition: all .2s;
+}
+.toggle-btn:first-child { border-right: none; }
+.toggle-btn.active {
+  background: var(--black); color: var(--white);
+  border-color: var(--black);
+}
+.toggle-btn:hover:not(.active) {
+  border-color: var(--purple); color: var(--purple);
+}
+
+/* ── SECTION TITLE ── */
+.section-eyebrow {
+  padding: 32px 40px 0;
+  display: flex; align-items: center; gap: 16px;
+}
+.eyebrow-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .3em;
+  color: var(--purple); text-transform: uppercase;
+}
+.eyebrow-count {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .2em;
+  color: rgba(0,0,0,.3);
+}
+
+/* ══════════════════════════════
+   ARTISTAS VIEW — CAROUSEL
+══════════════════════════════ */
+#view-artistas { display: block; }
+#view-top7 { display: none; }
+
+.carousel-container {
+  position: relative;
+  padding: 40px 0 0;
+  overflow: hidden;
+  /* Fade edges */
+}
+.carousel-container::before,
+.carousel-container::after {
+  content: ''; position: absolute; top: 0; bottom: 0; width: 120px; z-index: 10;
+  pointer-events: none;
+}
+.carousel-container::before {
+  left: 0;
+  background: linear-gradient(to right, var(--cream), transparent);
+}
+.carousel-container::after {
+  right: 0;
+  background: linear-gradient(to left, var(--cream), transparent);
+}
+
+.carousel-track {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 0 80px 0;
+  animation: carouselScroll 40s linear infinite;
+  width: max-content;
+}
+.carousel-track:hover { animation-play-state: paused; }
+
+@keyframes carouselScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+/* Artist Card */
+.artist-card {
+  position: relative;
+  flex-shrink: 0;
+  cursor: none;
+  transition: transform .4s ease;
+  border: 2px solid transparent;
+}
+.artist-card:hover { transform: translateY(-8px); border-color: var(--purple); }
+.artist-card.active-card { border-color: var(--purple); }
+
+/* Card sizes — vary to match reference */
+.artist-card.size-sm  { width: 140px; }
+.artist-card.size-md  { width: 190px; }
+.artist-card.size-lg  { width: 260px; }
+
+.card-photo {
+  width: 100%;
+  background: #c8c4be;
+  position: relative;
+  overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.size-sm  .card-photo { height: 180px; }
+.size-md  .card-photo { height: 240px; }
+.size-lg  .card-photo { height: 340px; }
+
+/* Different placeholder tones */
+.tone-1 { background: linear-gradient(160deg, #d4cfc9, #b8b2ab); }
+.tone-2 { background: linear-gradient(160deg, #c2bdb6, #a09990); }
+.tone-3 { background: linear-gradient(160deg, #1a1a2e, #16213e); }
+.tone-4 { background: linear-gradient(160deg, #cc4444, #991111); }
+.tone-5 { background: linear-gradient(160deg, #8888bb, #444488); }
+.tone-6 { background: linear-gradient(160deg, #2244aa, #112266); }
+.tone-7 { background: linear-gradient(160deg, #1a2a1a, #112211); }
+.tone-8 { background: linear-gradient(160deg, #aa7722, #664411); }
+.tone-9 { background: linear-gradient(160deg, #111, #333); }
+.tone-0 { background: linear-gradient(160deg, #cc88cc, #884488); }
+
+.card-photo-placeholder {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .15em;
+  color: rgba(255,255,255,.25); text-transform: uppercase;
+  text-align: center; padding: 8px;
+}
+
+.card-rank {
+  position: absolute; top: 10px; left: 12px;
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 11px; letter-spacing: .1em;
+  color: rgba(255,255,255,.6);
+}
+
+.card-info {
+  padding: 10px 0 4px;
+}
+.card-name {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 13px;
+  text-transform: uppercase; letter-spacing: -.01em;
+  line-height: 1.1;
+}
+.card-genre {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .15em;
+  color: rgba(0,0,0,.45); text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* ── INFO PANEL (below carousel) ── */
+.info-panel {
+  margin: 0 40px;
+  border-top: 1px solid rgba(0,0,0,.1);
+  min-height: 240px;
+  display: grid;
+  grid-template-columns: 120px 1fr 1fr 220px;
+  gap: 0;
+  overflow: hidden;
+  transition: opacity .3s;
+}
+
+.info-panel-default {
+  grid-column: 1 / -1;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .2em;
+  color: rgba(0,0,0,.2); text-transform: uppercase;
+  gap: 12px;
+}
+.info-panel-default::before {
+  content: '↑';
+  font-size: 16px;
+  animation: arrowFloat 2s ease-in-out infinite;
+}
+@keyframes arrowFloat {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+.info-panel-content { display: none; }
+.info-panel-content.visible { display: contents; }
+
+.info-col {
+  padding: 32px 32px 32px 0;
+  border-right: 1px solid rgba(0,0,0,.08);
+  display: flex; flex-direction: column; justify-content: center;
+}
+.info-col:last-child { border-right: none; padding-right: 0; padding-left: 32px; }
+.info-col:first-child { padding-left: 0; }
+
+.info-rank {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: 72px; letter-spacing: -.04em; line-height: 1;
+  color: rgba(0,0,0,.08);
+}
+
+.info-name {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700;
+  font-size: clamp(24px, 3vw, 40px);
+  text-transform: uppercase; letter-spacing: -.02em;
+  line-height: 1; margin-bottom: 12px;
+}
+.info-genre-tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .2em;
+  color: var(--purple); text-transform: uppercase;
+  border: 1px solid rgba(200,108,255,.4);
+  padding: 3px 8px; margin-bottom: 12px;
+}
+.info-city {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .15em;
+  color: rgba(0,0,0,.4); text-transform: uppercase;
+  display: flex; align-items: center; gap: 6px;
+}
+.info-city::before { content: '→'; color: var(--blue); }
+
+.info-bio {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; line-height: 1.8;
+  color: rgba(0,0,0,.55);
+}
+
+.info-stats {
+  display: flex; flex-direction: column; gap: 12px;
+}
+.info-stat-row {
+  display: flex; flex-direction: column; gap: 3px;
+}
+.info-stat-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px; letter-spacing: .25em;
+  color: rgba(0,0,0,.3); text-transform: uppercase;
+}
+.info-stat-val {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 16px; letter-spacing: -.01em;
+}
+.info-score {
+  font-size: 36px; letter-spacing: -.03em;
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.info-cta {
+  display: flex; flex-direction: column; gap: 12px; align-items: flex-start;
+}
+.btn-ficha {
+  display: inline-flex; align-items: center; gap: 10px;
+  background: var(--black); color: var(--white);
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 10px; letter-spacing: .2em;
+  text-transform: uppercase; text-decoration: none;
+  padding: 12px 20px; cursor: none; transition: background .2s;
+}
+.btn-ficha:hover { background: var(--purple); }
+.btn-ghost {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .2em;
+  color: rgba(0,0,0,.4); text-transform: uppercase;
+  text-decoration: none; cursor: none;
+  display: flex; align-items: center; gap: 6px;
+  transition: color .2s;
+}
+.btn-ghost:hover { color: var(--black); }
+
+/* ══════════════════════════════
+   TOP 7 VIEW
+══════════════════════════════ */
+.top7-list {
+  padding: 32px 40px 80px;
+  display: flex; flex-direction: column;
+}
+
+.top7-item {
+  display: grid;
+  grid-template-columns: 64px 280px 1fr auto;
+  align-items: center; gap: 32px;
+  padding: 24px 0;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  cursor: none;
+  transition: padding-left .3s, background .2s;
+  text-decoration: none; color: inherit;
+}
+.top7-item:hover { padding-left: 12px; }
+.top7-item:hover .t7-num { color: var(--purple); }
+
+.t7-num {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 40px; letter-spacing: -.03em;
+  color: rgba(0,0,0,.12); transition: color .2s; line-height: 1;
+}
+.t7-name {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: clamp(20px, 2.5vw, 30px);
+  text-transform: uppercase; letter-spacing: -.01em;
+}
+.t7-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px; letter-spacing: .15em;
+  color: rgba(0,0,0,.4); text-transform: uppercase;
+}
+.t7-score {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 28px; letter-spacing: -.02em;
+  background: linear-gradient(135deg, var(--purple), var(--blue));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── FOOTER ── */
+footer {
+  margin-top: auto;
+  border-top: 1px solid rgba(0,0,0,.1);
+  padding: 24px 40px;
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--cream-dark);
+}
+.footer-copy {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .1em;
+  color: rgba(0,0,0,.35); text-transform: uppercase;
+}
+.footer-links {
+  display: flex; gap: 28px;
+}
+.footer-links a {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px; letter-spacing: .15em;
+  color: rgba(0,0,0,.3); text-decoration: none;
+  text-transform: uppercase; cursor: none; transition: color .2s;
+}
+.footer-links a:hover { color: var(--black); }
+
+/* ── FULL-SCREEN NAV ── */
+.nav-overlay {
+  position: fixed; inset: 0; background: var(--black); z-index: 400;
+  display: flex; flex-direction: column; padding: 28px 40px;
+  transform: translateY(-100%);
+  transition: transform .6s cubic-bezier(.76,0,.24,1);
+}
+.nav-overlay.open { transform: translateY(0); }
+.nav-header {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 80px;
+}
+.nav-close {
+  background: none; border: none;
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: 11px; letter-spacing: .25em;
+  color: var(--white); cursor: none; text-transform: uppercase; transition: color .2s;
+}
+.nav-close:hover { color: var(--purple); }
+.nav-links { display: flex; flex-direction: column; gap: 8px; flex: 1; justify-content: center; }
+.nav-link {
+  font-family: 'Roboto Mono', monospace;
+  font-weight: 700; font-size: clamp(36px, 7vw, 80px);
+  text-transform: uppercase; letter-spacing: -.02em;
+  color: rgba(255,255,255,.25); text-decoration: none;
+  cursor: none; line-height: 1.1; transition: color .2s;
+  display: flex; align-items: center; gap: 20px;
+}
+.nav-link:hover, .nav-link.current { color: var(--white); }
+.nav-link.current .nav-lnum { color: var(--purple); }
+.nav-lnum { font-size: 11px; letter-spacing: .2em; color: rgba(255,255,255,.2); align-self: flex-end; margin-bottom: 10px; transition: color .2s; }
+.nav-link:hover .nav-lnum { color: var(--purple); }
+
+.menu-btn {
+  background: none; border: none;
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 700; font-size: 10px; letter-spacing: .25em;
+  color: var(--black); cursor: none; text-transform: uppercase;
+  display: flex; align-items: center; gap: 10px; padding: 0; transition: color .2s;
+}
+.menu-btn:hover { color: var(--purple); }
+.menu-lines { display: flex; flex-direction: column; gap: 4px; }
+.menu-lines span { display: block; height: 1px; background: currentColor; transition: width .3s; }
+.menu-lines span:nth-child(1) { width: 20px; }
+.menu-lines span:nth-child(2) { width: 13px; }
+.menu-btn:hover .menu-lines span { width: 20px; }
+
+@media (max-width: 768px) {
+  header { padding: 16px 20px; }
+  nav.main-nav { display: none; }
+  .view-toggle, .section-eyebrow { padding-left: 20px; padding-right: 20px; }
+  .carousel-track { padding: 0 40px; gap: 8px; }
+  .info-panel { margin: 0 20px; grid-template-columns: 1fr; }
+  .info-col { border-right: none; border-bottom: 1px solid rgba(0,0,0,.08); padding: 20px 0; }
+  .info-col:last-child { border-bottom: none; padding-left: 0; }
+  .top7-list { padding: 24px 20px 60px; }
+  .top7-item { grid-template-columns: 48px 1fr auto; gap: 16px; }
+  .t7-meta { display: none; }
+  footer { padding: 20px; flex-direction: column; gap: 16px; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="ring"></div>
+
+<!-- FULLSCREEN NAV -->
+<div class="nav-overlay" id="navOverlay">
+  <div class="nav-header">
+    <a href="index.html" class="tot-logo">
+      <svg class="tot-logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <rect width="100" height="100" fill="white"/>
+        <polygon points="18,0 38,0 82,100 62,100" fill="black"/>
+        <polygon points="0,42 100,14 100,30 0,58" fill="black"/>
+      </svg>
+      <span class="tot-logo-text" style="color:white">Top of<br>Talent</span>
+    </a>
+    <button class="nav-close" onclick="closeNav()">Cerrar ✕</button>
+  </div>
+  <div class="nav-links">
+    <a href="index.html" class="nav-link"><span class="nav-lnum">01</span>Inicio</a>
+    <a href="talento.html" class="nav-link current"><span class="nav-lnum">02</span>Talento</a>
+    <a href="proyectos.html" class="nav-link"><span class="nav-lnum">03</span>Proyectos</a>
+    <a href="nosotros.html" class="nav-link"><span class="nav-lnum">04</span>Nosotros</a>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <a href="index.html" class="tot-logo">
+    <svg class="tot-logo-mark" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <rect width="100" height="100" fill="white"/>
+      <polygon points="18,0 38,0 82,100 62,100" fill="black"/>
+      <polygon points="0,42 100,14 100,30 0,58" fill="black"/>
+    </svg>
+    <span class="tot-logo-text">Top of<br>Talent</span>
+  </a>
+
+  <nav class="main-nav">
+    <a href="index.html">Inicio</a>
+    <a href="talento.html" class="active">Talento</a>
+    <a href="proyectos.html">Proyectos</a>
+    <a href="nosotros.html">Nosotros</a>
+  </nav>
+
+  <div style="display:flex;align-items:center;gap:24px">
+    <span class="header-time" id="clock"></span>
+    <button class="menu-btn" onclick="openNav()">
+      <div class="menu-lines"><span></span><span></span></div>
+      Menu
+    </button>
+  </div>
+</header>
+
+<!-- PAGE WRAPPER -->
+<div class="page-wrapper">
+
+  <!-- TOGGLE -->
+  <div class="view-toggle">
+    <button class="toggle-btn active" id="btnArtistas" onclick="showView('artistas')">
+      Artistas
+    </button>
+    <button class="toggle-btn" id="btnTop7" onclick="showView('top7')">
+      Top 7
+    </button>
+  </div>
+
+  <div class="section-eyebrow">
+    <span class="eyebrow-num">Talento Nacional</span>
+    <span class="eyebrow-count" id="eyebrowCount">— 10 artistas</span>
+  </div>
+
+  <!-- ═══════════════════════
+       VIEW: ARTISTAS (carousel)
+  ═══════════════════════ -->
+  <div id="view-artistas">
+    <div class="carousel-container">
+      <div class="carousel-track" id="carouselTrack">
+        <!-- Cards populated by JS, duplicated for infinite loop -->
+      </div>
+    </div>
+
+    <!-- INFO PANEL -->
+    <div class="info-panel" id="infoPanel">
+      <div class="info-panel-default" id="panelDefault">
+        Pasa el cursor sobre un artista para ver su perfil
+      </div>
+      <div class="info-panel-content" id="panelContent">
+        <div class="info-col" style="align-items:center">
+          <span class="info-rank" id="infoRank">01</span>
+        </div>
+        <div class="info-col">
+          <span class="info-name" id="infoName">—</span>
+          <span class="info-genre-tag" id="infoGenre">—</span>
+          <span class="info-city" id="infoCity">—</span>
+        </div>
+        <div class="info-col">
+          <p class="info-bio" id="infoBio">—</p>
+        </div>
+        <div class="info-col">
+          <div class="info-stats">
+            <div class="info-stat-row">
+              <span class="info-stat-label">Score Top of Talent</span>
+              <span class="info-stat-val info-score" id="infoScore">—</span>
+            </div>
+            <div class="info-stat-row">
+              <span class="info-stat-label">Ciudad</span>
+              <span class="info-stat-val" id="infoCity2" style="font-size:14px">—</span>
+            </div>
+            <div class="info-stat-row">
+              <span class="info-stat-label">Activo desde</span>
+              <span class="info-stat-val" id="infoYear" style="font-size:14px">—</span>
+            </div>
+          </div>
+          <div class="info-cta" style="margin-top:20px">
+            <a href="artista.html" class="btn-ficha">Ver Ficha →</a>
+            <a href="#" class="btn-ghost">Spotify ↗</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════
+       VIEW: TOP 7
+  ═══════════════════════ -->
+  <div id="view-top7">
+    <div class="top7-list" id="top7List">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <span class="footer-copy">© 2025 Top of Talent · Ecuador</span>
+    <div class="footer-links">
+      <a href="index.html">Inicio</a>
+      <a href="talento.html">Talento</a>
+      <a href="proyectos.html">Proyectos</a>
+      <a href="nosotros.html">Nosotros</a>
+    </div>
+    <span class="footer-copy">contactoftalent@gmail.com</span>
+  </footer>
+</div>
+
+<script>
+// ─── DATA ───
+const artists = [
+  { rank:1,  name:'Artista Uno',    genre:'Indie · Alternativo',  city:'Quito',      year:2018, score:97, size:'lg', tone:'tone-3',
+    bio:'Referente del indie ecuatoriano con una propuesta sonora que mezcla lo urbano con lo atmosférico. Su catálogo, construido en total independencia, resuena más allá de las fronteras del país.' },
+  { rank:2,  name:'Artista Dos',    genre:'Hip-Hop · Trap',       city:'Guayaquil',  year:2019, score:94, size:'md', tone:'tone-4',
+    bio:'Voz principal del hip-hop porteño. Sus letras documentan la realidad de Guayaquil con una honestidad que ha ganado comunidades en toda la región.' },
+  { rank:3,  name:'Artista Tres',   genre:'Electronic · Ambient', city:'Cuenca',     year:2020, score:91, size:'sm', tone:'tone-5',
+    bio:'Productor y compositor que explora los límites del ambient latinoamericano. Referenciado por plataformas internacionales de curaduría electrónica.' },
+  { rank:4,  name:'Artista Cuatro', genre:'Pop · Rock',           city:'Quito',      year:2017, score:89, size:'md', tone:'tone-9',
+    bio:'Con más de 8 años en la escena, ha construido un sonido pop que mantiene su carácter sin sacrificar accesibilidad. De los más versátiles del ranking.' },
+  { rank:5,  name:'Artista Cinco',  genre:'R&B · Soul',           city:'Guayaquil',  year:2021, score:86, size:'lg', tone:'tone-6',
+    bio:'Fusiona el R&B contemporáneo con influencias del Pacífico ecuatoriano. Una propuesta de autor que está definiendo una nueva categoría en la escena nacional.' },
+  { rank:6,  name:'Artista Seis',   genre:'Folk · Andino',        city:'Ibarra',     year:2016, score:83, size:'sm', tone:'tone-7',
+    bio:'Recupera los sonidos andinos con una mirada contemporánea. Sus instrumentaciones mezclan quena, bombo y síntesis digital en una propuesta única.' },
+  { rank:7,  name:'Artista Siete',  genre:'Metal · Rock',         city:'Cuenca',     year:2015, score:80, size:'md', tone:'tone-9',
+    bio:'La banda de metal más consistente de la escena sur. Con 4 álbumes y presencia en festivales internacionales, representan la solidez del rock ecuatoriano.' },
+  { rank:8,  name:'Artista Ocho',   genre:'Jazz · Fusión',        city:'Quito',      year:2019, score:77, size:'sm', tone:'tone-8',
+    bio:'Instrumentista y compositor de jazz contemporáneo. Estudios en Berklee y una carrera construida entre Ecuador y Nueva York.' },
+  { rank:9,  name:'Artista Nueve',  genre:'Reggaeton · Urbano',   city:'Guayaquil',  year:2022, score:74, size:'md', tone:'tone-0',
+    bio:'Una de las propuestas urbanas más frescas del momento. Con menos de 3 años activo, ya acumula millones de streams y colaboraciones con artistas regionales.' },
+  { rank:10, name:'Artista Diez',   genre:'Punk · Post-Punk',     city:'Loja',       year:2020, score:71, size:'sm', tone:'tone-2',
+    bio:'Banda de punk que viene desde Loja con todo. Energía en vivo imbatible y letras que interpelan la realidad política y cultural del Ecuador.' },
+];
+
+// ─── BUILD CAROUSEL ───
+function buildCarousel() {
+  const track = document.getElementById('carouselTrack');
+  // Duplicate for infinite loop
+  const allArtists = [...artists, ...artists];
+  allArtists.forEach(a => {
+    const card = document.createElement('div');
+    card.className = `artist-card size-${a.size}`;
+    card.dataset.rank = a.rank;
+    card.innerHTML = `
+      <div class="card-photo ${a.tone}">
+        <span class="card-rank">#${String(a.rank).padStart(2,'0')}</span>
+        <span class="card-photo-placeholder">${a.name}</span>
+      </div>
+      <div class="card-info">
+        <div class="card-name">${a.name}</div>
+        <div class="card-genre">${a.genre}</div>
+      </div>`;
+    card.addEventListener('mouseenter', () => showArtistInfo(a));
+    card.addEventListener('mouseleave', hideArtistInfo);
+    track.appendChild(card);
+  });
+}
+
+// ─── INFO PANEL ───
+function showArtistInfo(a) {
+  document.getElementById('panelDefault').style.display = 'none';
+  document.getElementById('panelContent').classList.add('visible');
+  document.getElementById('infoRank').textContent = String(a.rank).padStart(2,'0');
+  document.getElementById('infoName').textContent = a.name;
+  document.getElementById('infoGenre').textContent = a.genre;
+  document.getElementById('infoCity').textContent = a.city;
+  document.getElementById('infoBio').textContent = a.bio;
+  document.getElementById('infoScore').textContent = a.score;
+  document.getElementById('infoCity2').textContent = a.city + ', Ecuador';
+  document.getElementById('infoYear').textContent = a.year;
+}
+
+function hideArtistInfo() {
+  // Keep visible - reset only on a small delay if not re-entering another card
+  setTimeout(() => {
+    const hovered = document.querySelector('.artist-card:hover');
+    if (!hovered) {
+      document.getElementById('panelDefault').style.display = 'flex';
+      document.getElementById('panelContent').classList.remove('visible');
+    }
+  }, 120);
+}
+
+// ─── TOP 7 ───
+function buildTop7() {
+  const list = document.getElementById('top7List');
+  const top7 = artists.slice(0,7);
+  top7.forEach(a => {
+    const item = document.createElement('a');
+    item.href = 'artista.html';
+    item.className = 'top7-item';
+    item.innerHTML = `
+      <span class="t7-num">${String(a.rank).padStart(2,'0')}</span>
+      <div>
+        <div class="t7-name">${a.name}</div>
+        <div class="t7-meta">${a.genre} &nbsp;|&nbsp; ${a.city}</div>
+      </div>
+      <span class="t7-meta">${a.year}</span>
+      <span class="t7-score">${a.score}</span>`;
+    list.appendChild(item);
+  });
+}
+
+// ─── TOGGLE VIEW ───
+function showView(view) {
+  const va = document.getElementById('view-artistas');
+  const vt = document.getElementById('view-top7');
+  const ba = document.getElementById('btnArtistas');
+  const bt = document.getElementById('btnTop7');
+  const count = document.getElementById('eyebrowCount');
+  if (view === 'artistas') {
+    va.style.display = 'block'; vt.style.display = 'none';
+    ba.classList.add('active'); bt.classList.remove('active');
+    count.textContent = '— 10 artistas';
+  } else {
+    va.style.display = 'none'; vt.style.display = 'block';
+    bt.classList.add('active'); ba.classList.remove('active');
+    count.textContent = '— top 7 del momento';
+  }
+}
+
+// ─── CLOCK ───
+function updateClock() {
+  const now = new Date();
+  const h = String(now.getHours()).padStart(2,'0');
+  const m = String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('clock').textContent = `${h}:${m}`;
+}
+updateClock(); setInterval(updateClock, 10000);
+
+// ─── CURSOR ───
+const cursor = document.getElementById('cursor');
+const ring = document.getElementById('ring');
+let mx=0, my=0, rx=0, ry=0;
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx+'px'; cursor.style.top = my+'px';
+});
+(function animRing(){
+  rx += (mx - rx) * .13; ry += (my - ry) * .13;
+  ring.style.left = rx+'px'; ring.style.top = ry+'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a, button, .artist-card, .top7-item').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.width = '14px'; cursor.style.height = '14px';
+    ring.style.width = '44px'; ring.style.height = '44px';
+    ring.style.borderColor = 'rgba(200,108,255,.8)';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.width = '8px'; cursor.style.height = '8px';
+    ring.style.width = '32px'; ring.style.height = '32px';
+    ring.style.borderColor = 'rgba(200,108,255,.6)';
+  });
+});
+
+// ─── NAV ───
+function openNav() {
+  document.getElementById('navOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeNav() {
+  document.getElementById('navOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if(e.key==='Escape') closeNav(); });
+
+// ─── INIT ───
+buildCarousel();
+buildTop7();
+document.getElementById('view-top7').style.display = 'none';
+</script>
+</body>
+</html>
